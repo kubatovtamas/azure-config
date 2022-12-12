@@ -5,13 +5,29 @@
 			"referenceName": "AzureDataLakeStorage1",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"triggerFolderPath": {
+				"type": "string",
+				"defaultValue": "@pipeline().parameters.triggerFolderPath"
+			},
+			"triggerFileName": {
+				"type": "string",
+				"defaultValue": "@pipeline().parameters.triggerFileName"
+			}
+		},
 		"annotations": [],
 		"type": "Binary",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "@pipeline().parameters.triggerFileName",
-				"folderPath": "@pipeline().parameters.triggerFolderPath",
+				"fileName": {
+					"value": "@dataset().triggerFileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().triggerFolderPath",
+					"type": "Expression"
+				},
 				"fileSystem": "test-container"
 			},
 			"compression": {
