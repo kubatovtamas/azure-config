@@ -1,0 +1,19 @@
+{
+	"name": "DestinationDataset_ed4",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "unzipped_test.csv",
+				"folderPath": "bronze",
+				"fileSystem": "test-container"
+			}
+		}
+	}
+}
