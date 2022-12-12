@@ -1,0 +1,9 @@
+{
+	"name": "kubadatafactory",
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "5d747c56-3a4d-440c-905f-32b2dcbede8a",
+		"tenantId": "b3194aca-13de-4122-8fdd-5b28caffaf40"
+	}
+}
