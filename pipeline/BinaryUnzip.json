@@ -32,10 +32,7 @@
 							"deleteFilesAfterCompletion": true
 						},
 						"formatSettings": {
-							"type": "BinaryReadSettings",
-							"compressionProperties": {
-								"type": "ZipDeflateReadSettings"
-							}
+							"type": "BinaryReadSettings"
 						}
 					},
 					"sink": {
@@ -49,7 +46,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SourceDataset_ed4",
+						"referenceName": "TriggeredZipFiles",
 						"type": "DatasetReference"
 					}
 				],
@@ -61,6 +58,16 @@
 				]
 			}
 		],
+		"parameters": {
+			"triggerFileName": {
+				"type": "string",
+				"defaultValue": "@triggerBody().fileName"
+			},
+			"triggerFolderPath": {
+				"type": "string",
+				"defaultValue": "@triggerBody().folderPath"
+			}
+		},
 		"annotations": []
 	}
 }
