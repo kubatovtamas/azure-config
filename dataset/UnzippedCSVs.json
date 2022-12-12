@@ -5,21 +5,12 @@
 			"referenceName": "AzureDataLakeStorage1",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"outputFileName": {
-				"type": "string",
-				"defaultValue": "@replace(@triggerBody().fileName, '.zip', '')"
-			}
-		},
 		"annotations": [],
 		"type": "Binary",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().outputFileName",
-					"type": "Expression"
-				},
+				"fileName": "@pipeline().parameters.outputFileName",
 				"folderPath": "bronze",
 				"fileSystem": "test-container"
 			}
