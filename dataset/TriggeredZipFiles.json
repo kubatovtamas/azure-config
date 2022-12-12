@@ -5,16 +5,6 @@
 			"referenceName": "AzureDataLakeStorage1",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"triggerFolderPath": {
-				"type": "string",
-				"defaultValue": "@pipeline().parameters.triggerFolderPath"
-			},
-			"triggerFileName": {
-				"type": "string",
-				"defaultValue": "@pipeline().parameters.triggerFileName"
-			}
-		},
 		"annotations": [],
 		"type": "Binary",
 		"typeProperties": {
