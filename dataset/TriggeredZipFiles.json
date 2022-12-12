@@ -10,8 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "@pipeline.parameters.triggerFileName",
-				"folderPath": "@pipeline.parameters.triggerFolderName",
+				"fileName": "@pipeline().parameters.triggerFileName",
+				"folderPath": "@pipeline().parameters.triggerFolderPath",
 				"fileSystem": "test-container"
 			},
 			"compression": {
