@@ -29,7 +29,7 @@
 						"storeSettings": {
 							"type": "AzureBlobFSReadSettings",
 							"recursive": true,
-							"deleteFilesAfterCompletion": true
+							"deleteFilesAfterCompletion": false
 						},
 						"formatSettings": {
 							"type": "BinaryReadSettings",
@@ -69,6 +69,10 @@
 			"triggerFolderPath": {
 				"type": "string",
 				"defaultValue": "@triggerBody().folderPath"
+			},
+			"outputFileName": {
+				"type": "string",
+				"defaultValue": "@replace(@triggerBody().fileName, '.zip', '')"
 			}
 		},
 		"annotations": []
