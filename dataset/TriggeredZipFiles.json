@@ -20,14 +20,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().triggerFileName",
-					"type": "Expression"
-				},
-				"folderPath": {
-					"value": "@dataset().triggerFolderPath",
-					"type": "Expression"
-				},
+				"fileName": "FL_insurance_sample.csv.zip",
+				"folderPath": "bronze",
 				"fileSystem": "test-container"
 			},
 			"compression": {
