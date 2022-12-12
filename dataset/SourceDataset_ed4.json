@@ -10,7 +10,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "FL_insurance_sample.csv.zip",
+				"fileName": {
+					"value": "@trigger().outputs.body.fileName",
+					"type": "Expression"
+				},
 				"folderPath": "bronze",
 				"fileSystem": "test-container"
 			},
