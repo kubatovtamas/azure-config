@@ -2,12 +2,16 @@
 	"name": "TriggerZipCreated",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
 					"referenceName": "BinaryUnzip",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"triggerFileName": "@triggerBody().fileName",
+					"triggerFolderPath": "@triggerBody().folderPath"
 				}
 			}
 		],
