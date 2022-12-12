@@ -1,5 +1,5 @@
 {
-	"name": "DestinationDataset_ed4",
+	"name": "UnzippedCSVs",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",

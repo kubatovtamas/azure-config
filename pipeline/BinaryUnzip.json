@@ -55,7 +55,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DestinationDataset_ed4",
+						"referenceName": "UnzippedCSVs",
 						"type": "DatasetReference"
 					}
 				]
