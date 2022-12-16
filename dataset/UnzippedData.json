@@ -5,11 +5,21 @@
 			"referenceName": "AzureDataLakeStorage1",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"sourceFileName": {
+				"type": "string",
+				"defaultValue": "@pipeline().parameters.sourceFileName"
+			}
+		},
 		"annotations": [],
 		"type": "Binary",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(first(split(dataset().sourceFileName, '.')), '.csv')",
+					"type": "Expression"
+				},
 				"folderPath": "bronze",
 				"fileSystem": "test-container"
 			}
