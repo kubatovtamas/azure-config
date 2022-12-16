@@ -1,5 +1,5 @@
 {
-	"name": "ZipData",
+	"name": "ZippedData",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
