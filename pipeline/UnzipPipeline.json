@@ -53,6 +53,11 @@
 				]
 			}
 		],
+		"parameters": {
+			"sourcePath": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }

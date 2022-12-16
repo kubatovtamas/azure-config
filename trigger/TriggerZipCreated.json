@@ -8,6 +8,9 @@
 				"pipelineReference": {
 					"referenceName": "UnzipPipeline",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"sourcePath": "@triggerBody().fileName"
 				}
 			}
 		],
