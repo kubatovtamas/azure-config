@@ -48,7 +48,10 @@
 				"outputs": [
 					{
 						"referenceName": "UnzippedData",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"sourceFileName": "@pipeline().parameters.sourceFileName"
+						}
 					}
 				]
 			}

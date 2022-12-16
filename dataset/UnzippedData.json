@@ -20,7 +20,7 @@
 					"value": "@concat(first(split(dataset().sourceFileName, '.')), '.csv')",
 					"type": "Expression"
 				},
-				"folderPath": "bronze",
+				"folderPath": "bronze/staging",
 				"fileSystem": "test-container"
 			}
 		}
