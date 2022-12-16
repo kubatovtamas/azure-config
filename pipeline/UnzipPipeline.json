@@ -54,7 +54,7 @@
 			}
 		],
 		"parameters": {
-			"sourcePath": {
+			"sourceFileName": {
 				"type": "string"
 			}
 		},
