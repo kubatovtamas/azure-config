@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"sourceFileName": {
+			"fileNameNoExtensionVar": {
 				"type": "string"
 			}
 		},
@@ -16,7 +16,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"folderPath": {
-					"value": "@concat('silver/', dataset().sourceFileName, '/')",
+					"value": "@concat('silver/', dataset().fileNameNoExtensionVar, '/')",
 					"type": "Expression"
 				},
 				"fileSystem": "test-container"

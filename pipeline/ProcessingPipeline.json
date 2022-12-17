@@ -63,7 +63,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Set variable1",
+						"activity": "SetFileNameNoExtension",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -120,22 +120,22 @@
 						"referenceName": "CSVData",
 						"type": "DatasetReference",
 						"parameters": {
-							"fileNameNoExtensionVar": {
-								"value": "@variables('fileNameNoExtension')",
-								"type": "Expression"
-							}
+							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
 						}
 					}
 				],
 				"outputs": [
 					{
 						"referenceName": "ParquetData",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
+						}
 					}
 				]
 			},
 			{
-				"name": "Set variable1",
+				"name": "SetFileNameNoExtension",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
