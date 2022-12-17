@@ -6,9 +6,8 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"sourceFileName": {
-				"type": "string",
-				"defaultValue": "@pipeline().parameters.sourceFileName"
+			"fileNameNoExtensionVar": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
@@ -17,7 +16,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat(first(split(dataset().sourceFileName, '.')), '.csv')",
+					"value": "@concat(dataset().fileNameNoExtensionVar, '.csv')",
 					"type": "Expression"
 				},
 				"folderPath": "bronze/staging",

@@ -5,7 +5,14 @@
 			{
 				"name": "UnzipToCSV",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "SetFileNameNoExtension",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -42,10 +49,7 @@
 				"inputs": [
 					{
 						"referenceName": "ZippedData",
-						"type": "DatasetReference",
-						"parameters": {
-							"sourceFileName": "@pipeline().parameters.sourceFileName"
-						}
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
@@ -53,7 +57,7 @@
 						"referenceName": "UnzippedData",
 						"type": "DatasetReference",
 						"parameters": {
-							"sourceFileName": "@pipeline().parameters.sourceFileName"
+							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
 						}
 					}
 				]
@@ -63,7 +67,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "SetFileNameNoExtension",
+						"activity": "UnzipToCSV",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -104,7 +108,218 @@
 						"mappings": [
 							{
 								"source": {
-									"name": ""
+									"name": "policyID",
+									"type": "Int64",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "policyID",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "statecode",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "statecode",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "county",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "county",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "eq_site_limit",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "eq_site_limit",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "hu_site_limit",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "hu_site_limit",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "fl_site_limit",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "fl_site_limit",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "fr_site_limit",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "fr_site_limit",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "tiv_2011",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "tiv_2011",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "tiv_2012",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "tiv_2012",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "eq_site_deductible",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "eq_site_deductible",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "hu_site_deductible",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "hu_site_deductible",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "fl_site_deductible",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "fl_site_deductible",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "fr_site_deductible",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "fr_site_deductible",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "point_latitude",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "point_latitude",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "point_longitude",
+									"type": "Double",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "point_longitude",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "line",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "line",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "construction",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "construction",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "point_granularity",
+									"type": "Int64",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "point_granularity",
+									"type": "String",
+									"physicalType": "UTF8"
 								}
 							}
 						],
@@ -137,14 +352,7 @@
 			{
 				"name": "SetFileNameNoExtension",
 				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "UnzipToCSV",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "fileNameNoExtension",
