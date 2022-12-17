@@ -61,7 +61,14 @@
 			{
 				"name": "CSVToParquet",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -94,6 +101,13 @@
 					"enableStaging": false,
 					"translator": {
 						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": ""
+								}
+							}
+						],
 						"typeConversion": true,
 						"typeConversionSettings": {
 							"allowDataTruncation": true,
@@ -104,7 +118,13 @@
 				"inputs": [
 					{
 						"referenceName": "CSVData",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"fileNameNoExtensionVar": {
+								"value": "@variables('fileNameNoExtension')",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
@@ -113,6 +133,26 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "UnzipToCSV",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fileNameNoExtension",
+					"value": {
+						"value": "@first(split(pipeline().parameters.sourceFileName, '.'))",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
