@@ -49,7 +49,10 @@
 				"inputs": [
 					{
 						"referenceName": "ZippedData",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"sourceFileName": "@variables('fileNameNoExtension')"
+						}
 					}
 				],
 				"outputs": [
