@@ -1,9 +1,9 @@
 {
-	"name": "UnzipPipeline",
+	"name": "ProcessingPipeline",
 	"properties": {
 		"activities": [
 			{
-				"name": "UnzipCopy",
+				"name": "UnzipToCSV",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -42,7 +42,10 @@
 				"inputs": [
 					{
 						"referenceName": "ZippedData",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"sourceFileName": "@pipeline().parameters.sourceFileName"
+						}
 					}
 				],
 				"outputs": [
@@ -54,6 +57,26 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
 			}
 		],
 		"parameters": {

@@ -1,0 +1,60 @@
+{
+	"name": "CSVtoParquet",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "CSVData",
+						"type": "DatasetReference"
+					},
+					"name": "CSVsource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ParquetData",
+						"type": "DatasetReference"
+					},
+					"name": "Parquetsink"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          policyID as integer,",
+				"          statecode as string,",
+				"          county as string,",
+				"          eq_site_limit as double,",
+				"          hu_site_limit as double,",
+				"          fl_site_limit as double,",
+				"          fr_site_limit as double,",
+				"          tiv_2011 as double,",
+				"          tiv_2012 as double,",
+				"          eq_site_deductible as double,",
+				"          hu_site_deductible as double,",
+				"          fl_site_deductible as double,",
+				"          fr_site_deductible as double,",
+				"          point_latitude as double,",
+				"          point_longitude as double,",
+				"          line as string,",
+				"          construction as string,",
+				"          point_granularity as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> CSVsource",
+				"CSVsource sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> Parquetsink"
+			]
+		}
+	}
+}
