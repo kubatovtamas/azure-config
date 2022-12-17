@@ -51,7 +51,10 @@
 						"referenceName": "ZippedData",
 						"type": "DatasetReference",
 						"parameters": {
-							"sourceFileName": "@variables('fileNameNoExtension')"
+							"sourceFileName": {
+								"value": "@pipeline().parameters.sourceFileName",
+								"type": "Expression"
+							}
 						}
 					}
 				],
