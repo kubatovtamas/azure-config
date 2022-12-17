@@ -59,8 +59,8 @@
 				]
 			},
 			{
-				"name": "Data flow1",
-				"type": "ExecuteDataFlow",
+				"name": "CSVToParquet",
+				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -71,17 +71,58 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
 					},
-					"traceLevel": "Fine"
-				}
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "CSVData",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ParquetData",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"parameters": {
 			"sourceFileName": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"fileNameNoExtension": {
+				"type": "String"
 			}
 		},
 		"annotations": []
