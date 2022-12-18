@@ -2,7 +2,7 @@
 	"name": "ExampleQueryGold",
 	"properties": {
 		"content": {
-			"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n-- Managed Table\nSELECT TOP (100) [county]\n,[count_policyID]\n,[max_eq_site_limit]\n,[policyID_with_max_eq_site_limit]\n FROM [insurance].[dbo].[fl_insurance_sample]\n",
+			"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n\n-- Managed Table\nSELECT TOP (100) [county]\n,[count_policyID]\n,[max_eq_site_limit]\n,[policyID_with_max_eq_site_limit]\n FROM [insurance].[dbo].[fl_insurance_sample]\n",
 			"metadata": {
 				"language": "sql"
 			},

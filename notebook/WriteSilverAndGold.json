@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "32b66563-7159-4f4b-a22b-61861053aef7"
+				"spark.autotune.trackingId": "b6682b1a-e0ea-44a8-9bfb-f4c356087894"
 			}
 		},
 		"metadata": {
@@ -68,7 +68,7 @@
 					"filename_no_extension = 'FL_insurance_sample'\n",
 					"database_name = 'insurance'"
 				],
-				"execution_count": 24
+				"execution_count": 46
 			},
 			{
 				"cell_type": "code",
@@ -217,7 +217,7 @@
 				"source": [
 					"1"
 				],
-				"execution_count": 42
+				"execution_count": 45
 			},
 			{
 				"cell_type": "code",
