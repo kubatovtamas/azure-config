@@ -2,7 +2,7 @@
 	"name": "UnzippedData",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "AzureDataLakeStorage1",
+			"referenceName": "euwestsynapse-WorkspaceDefaultStorage",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -23,5 +23,6 @@
 				"fileSystem": "test-container"
 			}
 		}
-	}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
 }

@@ -379,6 +379,8 @@
 				"type": "String"
 			}
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-12-18T06:01:47Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
 }

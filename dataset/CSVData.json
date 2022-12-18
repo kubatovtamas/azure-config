@@ -2,7 +2,7 @@
 	"name": "CSVData",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "AzureDataLakeStorage1",
+			"referenceName": "euwestsynapse-WorkspaceDefaultStorage",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -101,5 +101,6 @@
 				"type": "String"
 			}
 		]
-	}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
 }

@@ -2,7 +2,7 @@
 	"name": "ZippedData",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "AzureDataLakeStorage1",
+			"referenceName": "euwestsynapse-WorkspaceDefaultStorage",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -27,5 +27,6 @@
 				"level": "Optimal"
 			}
 		}
-	}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
 }
