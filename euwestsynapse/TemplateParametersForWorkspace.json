@@ -5,14 +5,8 @@
 		"workspaceName": {
 			"value": "euwestsynapse"
 		},
-		"AzureDataLakeStorage1_accountKey": {
-			"value": ""
-		},
 		"euwestsynapse-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:euwestsynapse.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
-		},
-		"AzureDataLakeStorage1_properties_typeProperties_url": {
-			"value": "https://kubastorage.dfs.core.windows.net/"
 		},
 		"euwestsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://kubastorage.dfs.core.windows.net"
