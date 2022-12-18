@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "18db9157-adec-401b-888f-a187e2df01f6"
+				"spark.autotune.trackingId": "6fe57427-1b88-4966-9387-e372e7222726"
 			}
 		},
 		"metadata": {
@@ -67,7 +67,7 @@
 				"source": [
 					"filename_no_extension = 'FL_insurance_sample'"
 				],
-				"execution_count": 2
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -98,7 +98,7 @@
 					"\n",
 					"required_cols_for_aggregation = ['county', 'policyID', 'eq_site_limit']"
 				],
-				"execution_count": 18
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -123,7 +123,7 @@
 					"    .csv(bronze_data_path)\n",
 					")"
 				],
-				"execution_count": null
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -148,7 +148,7 @@
 					"    .save(silver_data_path)\n",
 					")"
 				],
-				"execution_count": 8
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -167,7 +167,6 @@
 					"# If schema is appropriate for this aggregation, run and save as gold. Otherwise skip this step.\n",
 					"\n",
 					"if all(required_col in df.columns for required_col in required_cols_for_aggregation):\n",
-					"\n",
 					"    window = W.Window.partitionBy(\"county\")\n",
 					"    agg_df = (\n",
 					"        df\n",
@@ -195,7 +194,7 @@
 					"else:\n",
 					"    mssparkutils.notebook.exit(f\"Schema not appropriate for aggregation, skipping.\")"
 				],
-				"execution_count": 21
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -211,10 +210,14 @@
 					}
 				},
 				"source": [
-					"__df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet', format='parquet')\n",
-					"display(__df.limit(10))"
+					"(agg_df\n",
+					"        .write\n",
+					"        .format(\"parquet\")\n",
+					"        .mode(\"ignore\")\n",
+					"        .saveAsTable(f'default.{filename_no_extension}')\n",
+					"    )"
 				],
-				"execution_count": 1
+				"execution_count": 33
 			},
 			{
 				"cell_type": "code",
@@ -227,15 +230,10 @@
 						"transient": {
 							"deleting": false
 						}
-					},
-					"microsoft": {
-						"language": "python"
 					}
 				},
 				"source": [
-					"%%pyspark\n",
-					"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet', format='parquet')\n",
-					"df.write.mode(\"overwrite\").saveAsTable(\"default.YourTableName\")"
+					""
 				],
 				"execution_count": null
 			}

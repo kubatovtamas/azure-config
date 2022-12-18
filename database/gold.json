@@ -1,0 +1,22 @@
+{
+	"name": "gold",
+	"properties": {
+		"Name": "gold",
+		"EntityType": "DATABASE",
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"Properties": {
+			"IsSyMSCDMDatabase": true
+		},
+		"Source": {
+			"Provider": "ADLS",
+			"Location": "abfss://test-container@kubastorage.dfs.core.windows.net/gold",
+			"Properties": {
+				"FormatType": "parquet",
+				"LinkedServiceName": "euwestsynapse-WorkspaceDefaultStorage"
+			}
+		}
+	},
+	"type": "DATABASE"
+}

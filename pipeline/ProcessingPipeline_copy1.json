@@ -68,8 +68,21 @@
 				]
 			},
 			{
-				"name": "CSVToDelta",
-				"type": "Copy",
+				"name": "SetFileNameNoExtension",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fileNameNoExtension",
+					"value": {
+						"value": "@first(split(pipeline().parameters.sourceFileName, '.'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "WriteSilverAndGold",
+				"type": "SynapseNotebook",
 				"dependsOn": [
 					{
 						"activity": "UnzipToCSV",
@@ -87,284 +100,28 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+					"notebook": {
+						"referenceName": "AggregateAndSaveToGold",
+						"type": "NotebookReference"
+					},
+					"parameters": {
+						"filename_no_extension": {
+							"value": "@variables('fileNameNoExtension')"
 						}
 					},
-					"sink": {
-						"type": "ParquetSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "ParquetWriteSettings"
-						}
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "sparkpool",
+						"type": "BigDataPoolReference"
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "policyID",
-									"type": "Int64",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "policyID",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "statecode",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "statecode",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "county",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "county",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "eq_site_limit",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "eq_site_limit",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "hu_site_limit",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "hu_site_limit",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "fl_site_limit",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "fl_site_limit",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "fr_site_limit",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "fr_site_limit",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "tiv_2011",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "tiv_2011",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "tiv_2012",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "tiv_2012",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "eq_site_deductible",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "eq_site_deductible",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "hu_site_deductible",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "hu_site_deductible",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "fl_site_deductible",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "fl_site_deductible",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "fr_site_deductible",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "fr_site_deductible",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "point_latitude",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "point_latitude",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "point_longitude",
-									"type": "Double",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "point_longitude",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "line",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "line",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "construction",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "construction",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "point_granularity",
-									"type": "Int64",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "point_granularity",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							}
-						],
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "CSVData",
-						"type": "DatasetReference",
-						"parameters": {
-							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "ParquetData",
-						"type": "DatasetReference",
-						"parameters": {
-							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-						}
-					}
-				]
-			},
-			{
-				"name": "SetFileNameNoExtension",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "fileNameNoExtension",
-					"value": {
-						"value": "@first(split(pipeline().parameters.sourceFileName, '.'))",
-						"type": "Expression"
-					}
+					"executorSize": "Small",
+					"conf": {
+						"spark.dynamicAllocation.enabled": true,
+						"spark.dynamicAllocation.minExecutors": 1,
+						"spark.dynamicAllocation.maxExecutors": 2
+					},
+					"driverSize": "Small",
+					"numExecutors": 1
 				}
 			}
 		],
