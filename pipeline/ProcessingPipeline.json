@@ -1,5 +1,5 @@
 {
-	"name": "ProcessingPipeline_v2",
+	"name": "ProcessingPipeline",
 	"properties": {
 		"activities": [
 			{
@@ -100,6 +100,10 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebook": {
+						"referenceName": "WriteSilverAndGold",
+						"type": "NotebookReference"
+					},
 					"parameters": {
 						"filename_no_extension": {
 							"value": {
@@ -107,21 +111,16 @@
 								"type": "Expression"
 							},
 							"type": "string"
+						},
+						"database_name": {
+							"value": "insurance",
+							"type": "string"
 						}
 					},
 					"snapshot": true,
-					"sparkPool": {
-						"referenceName": "sparkpool",
-						"type": "BigDataPoolReference"
-					},
-					"executorSize": "Small",
 					"conf": {
-						"spark.dynamicAllocation.enabled": true,
-						"spark.dynamicAllocation.minExecutors": 1,
-						"spark.dynamicAllocation.maxExecutors": 2
-					},
-					"driverSize": "Small",
-					"numExecutors": 1
+						"spark.dynamicAllocation.enabled": true
+					}
 				}
 			}
 		],
