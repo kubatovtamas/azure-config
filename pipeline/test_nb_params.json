@@ -1,0 +1,39 @@
+{
+	"name": "test_nb_params",
+	"properties": {
+		"activities": [
+			{
+				"name": "Notebook1",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"parameters": {
+						"test_param": {
+							"value": "89",
+							"type": "int"
+						}
+					},
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "sparkpoolsmall",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"conf": {
+						"spark.dynamicAllocation.enabled": false
+					},
+					"driverSize": "Small"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
