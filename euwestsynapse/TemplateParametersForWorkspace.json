@@ -11,8 +11,8 @@
 		"euwestsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://kubastorage.dfs.core.windows.net"
 		},
-		"ZipAddedTrigger_properties_ProcessingPipeline_v1_parameters_sourceFileName": {
-			"value": "@triggerBody().fileName"
+		"ZipAddedTrigger_properties_ProcessingPipeline_parameters_sourceFileName": {
+			"value": "@triggerBody.fileName"
 		},
 		"ZipAddedTrigger_properties_typeProperties_scope": {
 			"value": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Storage/storageAccounts/kubastorage"
