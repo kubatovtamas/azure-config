@@ -368,62 +368,6 @@
 				}
 			},
 			{
-				"name": "AddToSynapseSQLDatabase",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "CSVToParquet",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "ParquetSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						}
-					},
-					"sink": {
-						"type": "SqlDWSink",
-						"preCopyScript": "DROP TABLE [insurance].[@variables('fileNameNoExtension')]\nGO",
-						"allowCopyCommand": true,
-						"tableOption": "autoCreate",
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "ParquetData",
-						"type": "DatasetReference",
-						"parameters": {
-							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DedicatedPoolTables",
-						"type": "DatasetReference",
-						"parameters": {
-							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-						}
-					}
-				]
-			},
-			{
 				"name": "AggregateAndSaveToGold",
 				"type": "SynapseNotebook",
 				"dependsOn": [
@@ -464,10 +408,117 @@
 					"executorSize": "Small",
 					"conf": {
 						"spark.dynamicAllocation.enabled": true,
-						"spark.dynamicAllocation.minExecutors": 1
+						"spark.dynamicAllocation.minExecutors": 1,
+						"spark.dynamicAllocation.maxExecutors": 2
 					},
 					"driverSize": "Small",
 					"numExecutors": 1
+				}
+			},
+			{
+				"name": "GetExists",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "CSVToParquet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DedicatedPoolTables",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
+						}
+					},
+					"fieldList": [
+						"exists"
+					]
+				}
+			},
+			{
+				"name": "AddToSynapseSQLIfNotExists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "GetExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('GetExists').output.exists",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "AddToSynapseSQL",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "ParquetSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									}
+								},
+								"sink": {
+									"type": "SqlDWSink",
+									"allowPolyBase": true,
+									"polyBaseSettings": {
+										"rejectValue": 0,
+										"rejectType": "value",
+										"useTypeDefault": true
+									},
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "ParquetData",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DedicatedPoolTables",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
+									}
+								}
+							]
+						}
+					]
 				}
 			}
 		],
