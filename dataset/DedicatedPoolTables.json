@@ -1,0 +1,27 @@
+{
+	"name": "DedicatedPoolTables",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "euwestsynapse-WorkspaceDefaultSqlServer",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"DBName": "DedicatedPool"
+			}
+		},
+		"parameters": {
+			"fileNameNoExtensionVar": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "insurance",
+			"table": {
+				"value": "@dataset().fileNameNoExtensionVar",
+				"type": "Expression"
+			}
+		}
+	}
+}

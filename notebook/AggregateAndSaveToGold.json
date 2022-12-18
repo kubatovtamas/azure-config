@@ -1,0 +1,146 @@
+{
+	"name": "AggregateAndSaveToGold",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "381a5002-4e91-4dec-9a5b-9bb21861a005"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Synapse/workspaces/euwestsynapse/bigDataPools/sparkpool",
+				"name": "sparkpool",
+				"type": "Spark",
+				"endpoint": "https://euwestsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.2",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"tags": [
+						"parameters"
+					]
+				},
+				"source": [
+					"filename_no_extension = 'FL_insurance_sample'\n",
+					"container = 'abfss://test-container@kubastorage.dfs.core.windows.net'\n",
+					"input_medallion = 'silver'\n",
+					"output_medallion = 'gold'"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql import functions as F, types as T, window as W\n",
+					"\n",
+					"\n",
+					"input_data_path = f'{container}/{input_medallion}/{filename_no_extension}.parquet'\n",
+					"output_data_path = f'{container}/{output_medallion}/{filename_no_extension}.parquet'\n",
+					"\n",
+					"\n",
+					"df = (\n",
+					"    spark\n",
+					"    .read\n",
+					"    .parquet(f'{container}/{input_medallion}/{filename_no_extension}.parquet')\n",
+					")\n",
+					"\n",
+					"window = W.Window.partitionBy(\"county\")\n",
+					"agg_df = (\n",
+					"    df\n",
+					"    .withColumn(\"count_policyID\", F.count('policyID').over(window))\n",
+					"    .withColumn(\"max_eq_site_limit\", F.max('eq_site_limit').over(window)) \n",
+					"    .withColumn('row_num', F.row_number().over(window.orderBy(F.col('eq_site_limit').desc())))\n",
+					"    .where(F.col('row_num') == 1)\n",
+					"    .select(\n",
+					"        'county', \n",
+					"        'count_policyID', \n",
+					"        'max_eq_site_limit', \n",
+					"        F.col('policyID').alias('policyID_with_max_eq_site_limit')\n",
+					"    )\n",
+					")\n",
+					"\n",
+					"(agg_df\n",
+					"    .write\n",
+					"    .format(\"parquet\")\n",
+					"    .mode(\"overwrite\")\n",
+					"    .save(f'{container}/{output_medallion}/{filename_no_extension}.parquet')\n",
+					")"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"mssparkutils.notebook.exit(f\"Successfully created {output_medallion}/{filename_no_extension}.parquet.\")"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
