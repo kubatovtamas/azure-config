@@ -3,14 +3,25 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "euwestsynapse-WorkspaceDefaultSqlServer",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"DBName": "serverlessPool"
+			}
+		},
+		"parameters": {
+			"fileNameNoExtensionVar": {
+				"type": "string"
+			}
 		},
 		"annotations": [],
 		"type": "AzureSqlDWTable",
 		"schema": [],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "integration_test_table"
+			"table": {
+				"value": "@dataset().fileNameNoExtensionVar",
+				"type": "Expression"
+			}
 		}
 	}
 }
