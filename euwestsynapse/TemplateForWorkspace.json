@@ -1363,6 +1363,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/AggregateAndSaveToGold')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
@@ -1502,7 +1522,7 @@
 				"nbformat": 4,
 				"nbformat_minor": 2,
 				"bigDataPool": {
-					"referenceName": "spark2interact",
+					"referenceName": "sparkpool",
 					"type": "BigDataPoolReference"
 				},
 				"sessionProperties": {
@@ -1515,7 +1535,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "515226fe-f254-451d-aa22-b5823546af1f"
+						"spark.autotune.trackingId": "18db9157-adec-401b-888f-a187e2df01f6"
 					}
 				},
 				"metadata": {
@@ -1529,10 +1549,10 @@
 						"name": "python"
 					},
 					"a365ComputeOptions": {
-						"id": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Synapse/workspaces/euwestsynapse/bigDataPools/spark2interact",
-						"name": "spark2interact",
+						"id": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Synapse/workspaces/euwestsynapse/bigDataPools/sparkpool",
+						"name": "sparkpool",
 						"type": "Spark",
-						"endpoint": "https://euwestsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/spark2interact",
+						"endpoint": "https://euwestsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
 						"auth": {
 							"type": "AAD",
 							"authResource": "https://dev.azuresynapse.net"
@@ -1540,8 +1560,7 @@
 						"sparkVersion": "3.2",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -1699,6 +1718,50 @@
 						],
 						"outputs": [],
 						"execution_count": 21
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"__df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet', format='parquet')\n",
+							"display(__df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\n",
+							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet', format='parquet')\n",
+							"df.write.mode(\"overwrite\").saveAsTable(\"default.YourTableName\")"
+						],
+						"outputs": [],
+						"execution_count": null
 					}
 				]
 			},
@@ -1771,7 +1834,7 @@
 			"properties": {
 				"autoPause": {
 					"enabled": true,
-					"delayInMinutes": 10
+					"delayInMinutes": 5
 				},
 				"autoScale": {
 					"enabled": false,
