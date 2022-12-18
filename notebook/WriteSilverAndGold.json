@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "8e14825d-8f32-47b3-a7c5-304d7035021f"
+				"spark.autotune.trackingId": "7d1ec568-b5ac-4afa-b9ee-094f5dc48daf"
 			}
 		},
 		"metadata": {
@@ -65,9 +65,10 @@
 					]
 				},
 				"source": [
-					"filename_no_extension = 'FL_insurance_sample'"
+					"filename_no_extension = 'FL_insurance_sample'\n",
+					"database_name = 'insurance'"
 				],
-				"execution_count": 2
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -98,7 +99,7 @@
 					"\n",
 					"required_cols_for_aggregation = ['county', 'policyID', 'eq_site_limit']"
 				],
-				"execution_count": 26
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -123,7 +124,7 @@
 					"    .csv(bronze_data_path)\n",
 					")"
 				],
-				"execution_count": 27
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -148,7 +149,7 @@
 					"    .save(silver_data_path)\n",
 					")"
 				],
-				"execution_count": 28
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -164,7 +165,7 @@
 					}
 				},
 				"source": [
-					"# If schema is appropriate for this aggregation, run and save as gold. Otherwise skip this step.\n",
+					"# If schema is appropriate for this aggregation, run and save as managed table. Otherwise skip this step.\n",
 					"\n",
 					"if all(required_col in df.columns for required_col in required_cols_for_aggregation):\n",
 					"    \n",
@@ -187,74 +188,18 @@
 					"        .write\n",
 					"        .format(\"parquet\")\n",
 					"        .mode(\"ignore\")\n",
-					"        .saveAsTable(f'gold.{filename_no_extension}')\n",
+					"        .saveAsTable(gold_data_path)\n",
 					"    )\n",
 					"\n",
-					"    mssparkutils.notebook.exit(f\"Written aggregate to {gold_data_path}.\")\n",
-					"\n",
-					"else:\n",
-					"    mssparkutils.notebook.exit(f\"Schema not appropriate for aggregation, skipping.\")"
-				],
-				"execution_count": 29
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					"(agg_df\n",
+					"    spark.sql(f\"CREATE DATABASE IF NOT EXISTS {database_name}\")\n",
+					"    (agg_df\n",
 					"        .write\n",
 					"        .format(\"parquet\")\n",
 					"        .mode(\"ignore\")\n",
-					"        .saveAsTable(f'default.{filename_no_extension}')\n",
+					"        .saveAsTable(f'{database_name}.{filename_no_extension}')\n",
 					"    )"
 				],
-				"execution_count": 33
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					"1"
-				],
-				"execution_count": null
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					""
-				],
-				"execution_count": null
+				"execution_count": 28
 			}
 		]
 	}
