@@ -418,6 +418,27 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/AzureSynapseAnalyticsTable1')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "euwestsynapse-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "integration_test_table"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/euwestsynapse-WorkspaceDefaultSqlServer')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/CSVData')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -546,6 +567,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().fileNameNoExtensionVar, '.parquet')",
+							"type": "Expression"
+						},
 						"folderPath": {
 							"value": "silver",
 							"type": "Expression"
@@ -623,40 +648,6 @@
 						"level": "Optimal"
 					}
 				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/euwestsynapse-WorkspaceDefaultStorage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/integration_dataset_test')]",
-			"type": "Microsoft.Synapse/workspaces/datasets",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "euwestsynapse-WorkspaceDefaultStorage",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"fileNameNoExtensionVar": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@concat(dataset().fileNameNoExtensionVar, '.parquet')",
-							"type": "Expression"
-						},
-						"folderPath": "silver",
-						"fileSystem": "test-container"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/euwestsynapse-WorkspaceDefaultStorage')]"
