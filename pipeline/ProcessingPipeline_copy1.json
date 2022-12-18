@@ -1,5 +1,5 @@
 {
-	"name": "ProcessingPipeline",
+	"name": "ProcessingPipeline_copy1",
 	"properties": {
 		"activities": [
 			{
@@ -443,8 +443,7 @@
 						}
 					},
 					"fieldList": [
-						"exists",
-						"structure"
+						"exists"
 					]
 				}
 			},
