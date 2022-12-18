@@ -387,10 +387,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebook": {
-						"referenceName": "AggregateAndSaveToGold",
-						"type": "NotebookReference"
-					},
 					"parameters": {
 						"filename_no_extension": {
 							"value": {
