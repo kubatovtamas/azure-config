@@ -2,18 +2,8 @@
 	"name": "TriggerZipCreated",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
-		"pipelines": [
-			{
-				"pipelineReference": {
-					"referenceName": "ProcessingPipeline_v1",
-					"type": "PipelineReference"
-				},
-				"parameters": {
-					"sourceFileName": "@triggerBody().fileName"
-				}
-			}
-		],
+		"runtimeState": "Stopped",
+		"pipelines": [],
 		"type": "BlobEventsTrigger",
 		"typeProperties": {
 			"blobPathBeginsWith": "/test-container/blobs/bronze/",
