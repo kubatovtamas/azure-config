@@ -16,7 +16,7 @@
 			"type": "string",
 			"defaultValue": "https://kubastorage.dfs.core.windows.net"
 		},
-		"ZipAddedTrigger_properties_ProcessingPipeline_parameters_sourceFileName": {
+		"ZipAddedTrigger_properties_ProcessingPipeline_v1_parameters_sourceFileName": {
 			"type": "string",
 			"defaultValue": "@triggerBody().fileName"
 		},
@@ -30,25 +30,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/DedicatedPool')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/spark2interact')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/ProcessingPipeline')]",
+			"name": "[concat(parameters('workspaceName'), '/ProcessingPipeline_v1')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -602,7 +584,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/ProcessingPipeline_copy1')]",
+			"name": "[concat(parameters('workspaceName'), '/ProcessingPipeline_v2')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -673,8 +655,21 @@
 						]
 					},
 					{
-						"name": "CSVToDelta",
-						"type": "Copy",
+						"name": "SetFileNameNoExtension",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileNameNoExtension",
+							"value": {
+								"value": "@first(split(pipeline().parameters.sourceFileName, '.'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "WriteSilverAndGold",
+						"type": "SynapseNotebook",
 						"dependsOn": [
 							{
 								"activity": "UnzipToCSV",
@@ -692,284 +687,32 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
+							"notebook": {
+								"referenceName": "AggregateAndSaveToGold",
+								"type": "NotebookReference"
+							},
+							"parameters": {
+								"filename_no_extension": {
+									"value": {
+										"value": "@variables('fileNameNoExtension')",
+										"type": "Expression"
+									},
+									"type": "string"
 								}
 							},
-							"sink": {
-								"type": "ParquetSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "ParquetWriteSettings"
-								}
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool",
+								"type": "BigDataPoolReference"
 							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "policyID",
-											"type": "Int64",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "policyID",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "statecode",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "statecode",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "county",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "county",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "eq_site_limit",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "eq_site_limit",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "hu_site_limit",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "hu_site_limit",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "fl_site_limit",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "fl_site_limit",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "fr_site_limit",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "fr_site_limit",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "tiv_2011",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "tiv_2011",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "tiv_2012",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "tiv_2012",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "eq_site_deductible",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "eq_site_deductible",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "hu_site_deductible",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "hu_site_deductible",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "fl_site_deductible",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "fl_site_deductible",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "fr_site_deductible",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "fr_site_deductible",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "point_latitude",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "point_latitude",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "point_longitude",
-											"type": "Double",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "point_longitude",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "line",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "line",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "construction",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "construction",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									},
-									{
-										"source": {
-											"name": "point_granularity",
-											"type": "Int64",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "point_granularity",
-											"type": "String",
-											"physicalType": "UTF8"
-										}
-									}
-								],
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "CSVData",
-								"type": "DatasetReference",
-								"parameters": {
-									"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "ParquetData",
-								"type": "DatasetReference",
-								"parameters": {
-									"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-								}
-							}
-						]
-					},
-					{
-						"name": "SetFileNameNoExtension",
-						"type": "SetVariable",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "fileNameNoExtension",
-							"value": {
-								"value": "@first(split(pipeline().parameters.sourceFileName, '.'))",
-								"type": "Expression"
-							}
+							"executorSize": "Small",
+							"conf": {
+								"spark.dynamicAllocation.enabled": true,
+								"spark.dynamicAllocation.minExecutors": 1,
+								"spark.dynamicAllocation.maxExecutors": 2
+							},
+							"driverSize": "Small",
+							"numExecutors": 1
 						}
 					}
 				],
@@ -993,8 +736,8 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/ZippedData')]",
 				"[concat(variables('workspaceId'), '/datasets/UnzippedData')]",
-				"[concat(variables('workspaceId'), '/datasets/CSVData')]",
-				"[concat(variables('workspaceId'), '/datasets/ParquetData')]"
+				"[concat(variables('workspaceId'), '/notebooks/AggregateAndSaveToGold')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
 			]
 		},
 		{
@@ -1224,11 +967,11 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "ProcessingPipeline",
+							"referenceName": "ProcessingPipeline_v1",
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"sourceFileName": "[parameters('ZipAddedTrigger_properties_ProcessingPipeline_parameters_sourceFileName')]"
+							"sourceFileName": "[parameters('ZipAddedTrigger_properties_ProcessingPipeline_v1_parameters_sourceFileName')]"
 						}
 					}
 				],
@@ -1244,7 +987,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/ProcessingPipeline')]"
+				"[concat(variables('workspaceId'), '/pipelines/ProcessingPipeline_v1')]"
 			]
 		},
 		{
@@ -1267,118 +1010,12 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/CSVtoParquet')]",
-			"type": "Microsoft.Synapse/workspaces/dataflows",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "CSVData",
-								"type": "DatasetReference"
-							},
-							"name": "CSVsource"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "ParquetData",
-								"type": "DatasetReference"
-							},
-							"name": "Parquetsink"
-						}
-					],
-					"transformations": [],
-					"scriptLines": [
-						"source(output(",
-						"          policyID as string,",
-						"          statecode as string,",
-						"          county as string,",
-						"          eq_site_limit as string,",
-						"          hu_site_limit as string,",
-						"          fl_site_limit as string,",
-						"          fr_site_limit as string,",
-						"          tiv_2011 as string,",
-						"          tiv_2012 as string,",
-						"          eq_site_deductible as string,",
-						"          hu_site_deductible as string,",
-						"          fl_site_deductible as string,",
-						"          fr_site_deductible as string,",
-						"          point_latitude as string,",
-						"          point_longitude as string,",
-						"          line as string,",
-						"          construction as string,",
-						"          point_granularity as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> CSVsource",
-						"CSVsource sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> Parquetsink"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/datasets/CSVData')]",
-				"[concat(variables('workspaceId'), '/datasets/ParquetData')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
 			"type": "Microsoft.Synapse/workspaces/credentials",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"type": "ManagedIdentity",
 				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "-- SELECT county, COUNT(policyID) AS count_policyID, MAX(eq_site_limit) AS max_eq_site_limit\n-- FROM (\n--   SELECT *, ROW_NUMBER() OVER (PARTITION BY county ORDER BY eq_site_limit DESC) AS row_num\n--   FROM [insurance].[FL_insurance_sample]\n-- ) t\n-- WHERE row_num = 1\n-- GROUP BY county\n\n\n-- SELECT top 1000 *, ROW_NUMBER() OVER (PARTITION BY county ORDER BY eq_site_limit DESC) AS row_num\n-- FROM [insurance].[FL_insurance_sample]\n\n-- where policyID = 949187\n\nselect count(*)\nfrom [insurance].[FL_insurance_sample]\nunion all\nselect DISTINCT count(policyID)\nfrom [insurance].[FL_insurance_sample];",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "DedicatedPool",
-						"poolName": "DedicatedPool"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "master",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
 			},
 			"dependsOn": []
 		},
@@ -1522,7 +1159,7 @@
 				"nbformat": 4,
 				"nbformat_minor": 2,
 				"bigDataPool": {
-					"referenceName": "sparkpool",
+					"referenceName": "spark2interact",
 					"type": "BigDataPoolReference"
 				},
 				"sessionProperties": {
@@ -1535,7 +1172,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "18db9157-adec-401b-888f-a187e2df01f6"
+						"spark.autotune.trackingId": "2e74b885-4039-428d-aea0-e7a4092896f1"
 					}
 				},
 				"metadata": {
@@ -1549,10 +1186,10 @@
 						"name": "python"
 					},
 					"a365ComputeOptions": {
-						"id": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Synapse/workspaces/euwestsynapse/bigDataPools/sparkpool",
-						"name": "sparkpool",
+						"id": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Synapse/workspaces/euwestsynapse/bigDataPools/spark2interact",
+						"name": "spark2interact",
 						"type": "Spark",
-						"endpoint": "https://euwestsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
+						"endpoint": "https://euwestsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/spark2interact",
 						"auth": {
 							"type": "AAD",
 							"authResource": "https://dev.azuresynapse.net"
@@ -1585,7 +1222,7 @@
 							"filename_no_extension = 'FL_insurance_sample'"
 						],
 						"outputs": [],
-						"execution_count": 2
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
@@ -1617,7 +1254,7 @@
 							"required_cols_for_aggregation = ['county', 'policyID', 'eq_site_limit']"
 						],
 						"outputs": [],
-						"execution_count": 18
+						"execution_count": 26
 					},
 					{
 						"cell_type": "code",
@@ -1643,7 +1280,7 @@
 							")"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 27
 					},
 					{
 						"cell_type": "code",
@@ -1659,17 +1296,17 @@
 							}
 						},
 						"source": [
-							"# Write silver dataset in delta lake format\n",
+							"# Write silver dataset in parquet format\n",
 							"\n",
 							"(df\n",
 							"    .write\n",
-							"    .format(\"delta\")\n",
+							"    .format(\"parquet\")\n",
 							"    .mode(\"ignore\")\n",
 							"    .save(silver_data_path)\n",
 							")"
 						],
 						"outputs": [],
-						"execution_count": 8
+						"execution_count": 28
 					},
 					{
 						"cell_type": "code",
@@ -1688,7 +1325,7 @@
 							"# If schema is appropriate for this aggregation, run and save as gold. Otherwise skip this step.\n",
 							"\n",
 							"if all(required_col in df.columns for required_col in required_cols_for_aggregation):\n",
-							"\n",
+							"    \n",
 							"    window = W.Window.partitionBy(\"county\")\n",
 							"    agg_df = (\n",
 							"        df\n",
@@ -1708,7 +1345,7 @@
 							"        .write\n",
 							"        .format(\"parquet\")\n",
 							"        .mode(\"ignore\")\n",
-							"        .save(gold_data_path)\n",
+							"        .saveAsTable(f'gold.{filename_no_extension}')\n",
 							"    )\n",
 							"\n",
 							"    mssparkutils.notebook.exit(f\"Written aggregate to {gold_data_path}.\")\n",
@@ -1717,7 +1354,7 @@
 							"    mssparkutils.notebook.exit(f\"Schema not appropriate for aggregation, skipping.\")"
 						],
 						"outputs": [],
-						"execution_count": 21
+						"execution_count": 29
 					},
 					{
 						"cell_type": "code",
@@ -1733,11 +1370,15 @@
 							}
 						},
 						"source": [
-							"__df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet', format='parquet')\n",
-							"display(__df.limit(10))"
+							"(agg_df\n",
+							"        .write\n",
+							"        .format(\"parquet\")\n",
+							"        .mode(\"ignore\")\n",
+							"        .saveAsTable(f'default.{filename_no_extension}')\n",
+							"    )"
 						],
 						"outputs": [],
-						"execution_count": 1
+						"execution_count": 33
 					},
 					{
 						"cell_type": "code",
@@ -1750,15 +1391,29 @@
 								"transient": {
 									"deleting": false
 								}
-							},
-							"microsoft": {
-								"language": "python"
 							}
 						},
 						"source": [
-							"%%pyspark\n",
-							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/gold/FL_insurance_sample/part-00000-340e58e9-196f-47a9-bd8a-2d54fd92b4df-c000.snappy.parquet', format='parquet')\n",
-							"df.write.mode(\"overwrite\").saveAsTable(\"default.YourTableName\")"
+							"1"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							""
 						],
 						"outputs": [],
 						"execution_count": null
@@ -1768,7 +1423,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/LakeDatabase')]",
+			"name": "[concat(parameters('workspaceName'), '/gold')]",
 			"type": "Microsoft.Synapse/workspaces/databases",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -1777,7 +1432,7 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
-							"Name": "LakeDatabase",
+							"Name": "gold",
 							"EntityType": "DATABASE",
 							"Origin": {
 								"Type": "SPARK"
