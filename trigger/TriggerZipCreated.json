@@ -8,6 +8,9 @@
 				"pipelineReference": {
 					"referenceName": "ProcessingPipeline_v1",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"sourceFileName": "@triggerBody().fileName"
 				}
 			}
 		],
