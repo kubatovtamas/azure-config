@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "7d1ec568-b5ac-4afa-b9ee-094f5dc48daf"
+				"spark.autotune.trackingId": "4069d691-84b5-418a-991f-6f42a68786fe"
 			}
 		},
 		"metadata": {
@@ -188,7 +188,7 @@
 					"        .write\n",
 					"        .format(\"parquet\")\n",
 					"        .mode(\"ignore\")\n",
-					"        .saveAsTable(gold_data_path)\n",
+					"        .save(gold_data_path)\n",
 					"    )\n",
 					"\n",
 					"    spark.sql(f\"CREATE DATABASE IF NOT EXISTS {database_name}\")\n",
@@ -199,7 +199,43 @@
 					"        .saveAsTable(f'{database_name}.{filename_no_extension}')\n",
 					"    )"
 				],
-				"execution_count": 28
+				"execution_count": 41
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"1"
+				],
+				"execution_count": 40
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				],
+				"execution_count": null
 			}
 		]
 	}
