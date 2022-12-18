@@ -22,6 +22,15 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/DedicatedPool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/ProcessingPipeline')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -393,7 +402,7 @@
 						}
 					},
 					{
-						"name": "Copy data1",
+						"name": "AddToSynapseSQLDatabase",
 						"type": "Copy",
 						"dependsOn": [
 							{
@@ -422,12 +431,10 @@
 							},
 							"sink": {
 								"type": "SqlDWSink",
-								"allowPolyBase": true,
-								"polyBaseSettings": {
-									"rejectValue": 0,
-									"rejectType": "value",
-									"useTypeDefault": true
-								}
+								"allowCopyCommand": true,
+								"copyCommandSettings": {},
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
 							},
 							"enableStaging": false
 						},
@@ -442,13 +449,60 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AzureSynapseAnalyticsTable1",
+								"referenceName": "DedicatedPoolTables",
 								"type": "DatasetReference",
 								"parameters": {
 									"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
 								}
 							}
 						]
+					},
+					{
+						"name": "AggregateAndSaveToGold",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "CSVToParquet",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "AggregateAndSaveToGold",
+								"type": "NotebookReference"
+							},
+							"parameters": {
+								"filename_no_extension": {
+									"value": {
+										"value": "@variables('fileNameNoExtension')",
+										"type": "Expression"
+									},
+									"type": "string"
+								}
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool",
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
+							"conf": {
+								"spark.dynamicAllocation.enabled": true,
+								"spark.dynamicAllocation.minExecutors": 1
+							},
+							"driverSize": "Small",
+							"numExecutors": 1
+						}
 					}
 				],
 				"policy": {
@@ -473,39 +527,9 @@
 				"[concat(variables('workspaceId'), '/datasets/UnzippedData')]",
 				"[concat(variables('workspaceId'), '/datasets/CSVData')]",
 				"[concat(variables('workspaceId'), '/datasets/ParquetData')]",
-				"[concat(variables('workspaceId'), '/datasets/AzureSynapseAnalyticsTable1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/AzureSynapseAnalyticsTable1')]",
-			"type": "Microsoft.Synapse/workspaces/datasets",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "euwestsynapse-WorkspaceDefaultSqlServer",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"DBName": "serverlessPool"
-					}
-				},
-				"parameters": {
-					"fileNameNoExtensionVar": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlDWTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": {
-						"value": "@dataset().fileNameNoExtensionVar",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/euwestsynapse-WorkspaceDefaultSqlServer')]"
+				"[concat(variables('workspaceId'), '/datasets/DedicatedPoolTables')]",
+				"[concat(variables('workspaceId'), '/notebooks/AggregateAndSaveToGold')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
 			]
 		},
 		{
@@ -539,83 +563,42 @@
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
-				"schema": [
-					{
-						"name": "policyID",
-						"type": "String"
-					},
-					{
-						"name": "statecode",
-						"type": "String"
-					},
-					{
-						"name": "county",
-						"type": "String"
-					},
-					{
-						"name": "eq_site_limit",
-						"type": "String"
-					},
-					{
-						"name": "hu_site_limit",
-						"type": "String"
-					},
-					{
-						"name": "fl_site_limit",
-						"type": "String"
-					},
-					{
-						"name": "fr_site_limit",
-						"type": "String"
-					},
-					{
-						"name": "tiv_2011",
-						"type": "String"
-					},
-					{
-						"name": "tiv_2012",
-						"type": "String"
-					},
-					{
-						"name": "eq_site_deductible",
-						"type": "String"
-					},
-					{
-						"name": "hu_site_deductible",
-						"type": "String"
-					},
-					{
-						"name": "fl_site_deductible",
-						"type": "String"
-					},
-					{
-						"name": "fr_site_deductible",
-						"type": "String"
-					},
-					{
-						"name": "point_latitude",
-						"type": "String"
-					},
-					{
-						"name": "point_longitude",
-						"type": "String"
-					},
-					{
-						"name": "line",
-						"type": "String"
-					},
-					{
-						"name": "construction",
-						"type": "String"
-					},
-					{
-						"name": "point_granularity",
-						"type": "String"
-					}
-				]
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/euwestsynapse-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DedicatedPoolTables')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "euwestsynapse-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "DedicatedPool"
+					}
+				},
+				"parameters": {
+					"fileNameNoExtensionVar": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "insurance",
+					"table": {
+						"value": "@dataset().fileNameNoExtensionVar",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/euwestsynapse-WorkspaceDefaultSqlServer')]"
 			]
 		},
 		{
@@ -862,6 +845,158 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/AggregateAndSaveToGold')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "sparkpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "c4ae4cf3-06e9-4ead-96bc-59c232280ec2"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Synapse/workspaces/euwestsynapse/bigDataPools/sparkpool",
+						"name": "sparkpool",
+						"type": "Spark",
+						"endpoint": "https://euwestsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.2",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"filename_no_extension = 'FL_insurance_sample'\n",
+							"container = 'abfss://test-container@kubastorage.dfs.core.windows.net'\n",
+							"input_medallion = 'silver'\n",
+							"output_medallion = 'gold'"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql import functions as F, types as T, window as W\n",
+							"\n",
+							"\n",
+							"input_data_path = f'{container}/{input_medallion}/{filename_no_extension}.parquet'\n",
+							"output_data_path = f'{container}/{output_medallion}/{filename_no_extension}.parquet'\n",
+							"\n",
+							"\n",
+							"df = (\n",
+							"    spark\n",
+							"    .read\n",
+							"    .parquet(f'{container}/{input_medallion}/{filename_no_extension}.parquet')\n",
+							")\n",
+							"\n",
+							"window = W.Window.partitionBy(\"county\")\n",
+							"agg_df = (\n",
+							"    df\n",
+							"    .withColumn(\"count_policyID\", F.count('policyID').over(window))\n",
+							"    .withColumn(\"max_eq_site_limit\", F.max('eq_site_limit').over(window)) \n",
+							"    .withColumn('row_num', F.row_number().over(window.orderBy(F.col('eq_site_limit').desc())))\n",
+							"    .where(F.col('row_num') == 1)\n",
+							"    .select(\n",
+							"        'county', \n",
+							"        'count_policyID', \n",
+							"        'max_eq_site_limit', \n",
+							"        F.col('policyID').alias('policyID_with_max_eq_site_limit')\n",
+							"    )\n",
+							")\n",
+							"\n",
+							"(agg_df\n",
+							"    .write\n",
+							"    .format(\"parquet\")\n",
+							"    .mode(\"overwrite\")\n",
+							"    .save(f'{container}/{output_medallion}/{filename_no_extension}.parquet')\n",
+							")"
+						],
+						"outputs": [],
+						"execution_count": 9
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"mssparkutils.notebook.exit(f\"Successfully created {output_medallion}/{filename_no_extension}.parquet.\")"
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/sparkpool')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
@@ -881,6 +1016,18 @@
 				"sparkVersion": "3.2",
 				"isComputeIsolationEnabled": false,
 				"sessionLevelPackagesEnabled": true,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "westeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DedicatedPool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
 				"annotations": []
 			},
 			"dependsOn": [],
