@@ -151,9 +151,18 @@
 								}
 							},
 							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool",
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
 							"conf": {
-								"spark.dynamicAllocation.enabled": true
-							}
+								"spark.dynamicAllocation.enabled": false,
+								"spark.dynamicAllocation.minExecutors": 1,
+								"spark.dynamicAllocation.maxExecutors": 1
+							},
+							"driverSize": "Small",
+							"numExecutors": 1
 						}
 					}
 				],
@@ -177,7 +186,8 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/ZippedData')]",
 				"[concat(variables('workspaceId'), '/datasets/UnzippedData')]",
-				"[concat(variables('workspaceId'), '/notebooks/WriteSilverAndGold')]"
+				"[concat(variables('workspaceId'), '/notebooks/WriteSilverAndGold')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
 			]
 		},
 		{
@@ -465,7 +475,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n-- Managed Table\nSELECT TOP (100) [county]\n,[count_policyID]\n,[max_eq_site_limit]\n,[policyID_with_max_eq_site_limit]\n FROM [insurance].[dbo].[fl_insurance_sample]\n",
+					"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n\n-- Managed Table\nSELECT TOP (100) [county]\n,[count_policyID]\n,[max_eq_site_limit]\n,[policyID_with_max_eq_site_limit]\n FROM [insurance].[dbo].[fl_insurance_sample]\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -485,32 +495,12 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/silver/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+					"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/silver/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
 						"databaseName": "master",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "SELECT TOP (100) [county]\n,[count_policyID]\n,[max_eq_site_limit]\n,[policyID_with_max_eq_site_limit]\n FROM [insurance].[dbo].[fl_insurance_sample]",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "insurance",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
@@ -536,7 +526,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "8fdb7f6e-0823-44ae-b011-332e3057abe8"
+						"spark.autotune.trackingId": "395b42fb-08e3-4eeb-b73c-f24d04416da4"
 					}
 				},
 				"metadata": {
@@ -558,6 +548,7 @@
 							"# Parquet\n",
 							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/FL_insurance_sample/**', format='parquet')\n",
 							"display(df.limit(100))\n",
+							"\n",
 							"\n",
 							"# Managed Table\n",
 							"df = spark.sql(\"SELECT * FROM `insurance`.`fl_insurance_sample`\")\n",
@@ -587,7 +578,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "e8642804-0dea-4ddc-9a18-1c80604fa7d6"
+						"spark.autotune.trackingId": "a2f528ec-a600-4878-9340-be1cd6e31564"
 					}
 				},
 				"metadata": {
@@ -606,6 +597,8 @@
 					{
 						"cell_type": "code",
 						"source": [
+							"# Parquet\r\n",
+							"\r\n",
 							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/FL_insurance_sample/**', format='parquet')\r\n",
 							"display(df.limit(100))"
 						],
@@ -637,7 +630,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "32b66563-7159-4f4b-a22b-61861053aef7"
+						"spark.autotune.trackingId": "b6682b1a-e0ea-44a8-9bfb-f4c356087894"
 					}
 				},
 				"metadata": {
@@ -688,7 +681,7 @@
 							"database_name = 'insurance'"
 						],
 						"outputs": [],
-						"execution_count": 24
+						"execution_count": 46
 					},
 					{
 						"cell_type": "code",
@@ -842,7 +835,7 @@
 							"1"
 						],
 						"outputs": [],
-						"execution_count": 42
+						"execution_count": 45
 					},
 					{
 						"cell_type": "code",
@@ -869,31 +862,6 @@
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/sparkpool')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"autoPause": {
-					"enabled": true,
-					"delayInMinutes": 5
-				},
-				"autoScale": {
-					"enabled": false,
-					"maxNodeCount": 10,
-					"minNodeCount": 3
-				},
-				"nodeCount": 3,
-				"nodeSize": "Small",
-				"nodeSizeFamily": "MemoryOptimized",
-				"sparkVersion": "3.2",
-				"isComputeIsolationEnabled": false,
-				"sessionLevelPackagesEnabled": true,
-				"annotations": []
-			},
-			"dependsOn": [],
-			"location": "westeurope"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/spark2interact')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
