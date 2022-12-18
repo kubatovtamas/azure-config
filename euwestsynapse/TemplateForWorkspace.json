@@ -410,63 +410,6 @@
 						}
 					},
 					{
-						"name": "AddToSynapseSQLDatabase",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "CSVToParquet",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "ParquetSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								}
-							},
-							"sink": {
-								"type": "SqlDWSink",
-								"preCopyScript": "DROP TABLE [insurance].[@variables('fileNameNoExtension')]\nGO",
-								"allowCopyCommand": true,
-								"copyCommandSettings": {},
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "ParquetData",
-								"type": "DatasetReference",
-								"parameters": {
-									"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DedicatedPoolTables",
-								"type": "DatasetReference",
-								"parameters": {
-									"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
-								}
-							}
-						]
-					},
-					{
 						"name": "AggregateAndSaveToGold",
 						"type": "SynapseNotebook",
 						"dependsOn": [
@@ -507,10 +450,117 @@
 							"executorSize": "Small",
 							"conf": {
 								"spark.dynamicAllocation.enabled": true,
-								"spark.dynamicAllocation.minExecutors": 1
+								"spark.dynamicAllocation.minExecutors": 1,
+								"spark.dynamicAllocation.maxExecutors": 2
 							},
 							"driverSize": "Small",
 							"numExecutors": 1
+						}
+					},
+					{
+						"name": "GetExists",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "CSVToParquet",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DedicatedPoolTables",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
+								}
+							},
+							"fieldList": [
+								"exists"
+							]
+						}
+					},
+					{
+						"name": "AddToSynapseSQLIfNotExists",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetExists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@activity('GetExists').output.exists",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "AddToSynapseSQL",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											}
+										},
+										"sink": {
+											"type": "SqlDWSink",
+											"allowPolyBase": true,
+											"polyBaseSettings": {
+												"rejectValue": 0,
+												"rejectType": "value",
+												"useTypeDefault": true
+											},
+											"tableOption": "autoCreate",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ParquetData",
+											"type": "DatasetReference",
+											"parameters": {
+												"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DedicatedPoolTables",
+											"type": "DatasetReference",
+											"parameters": {
+												"fileNameNoExtensionVar": "@variables('fileNameNoExtension')"
+											}
+										}
+									]
+								}
+							]
 						}
 					}
 				],
@@ -536,9 +586,9 @@
 				"[concat(variables('workspaceId'), '/datasets/UnzippedData')]",
 				"[concat(variables('workspaceId'), '/datasets/CSVData')]",
 				"[concat(variables('workspaceId'), '/datasets/ParquetData')]",
-				"[concat(variables('workspaceId'), '/datasets/DedicatedPoolTables')]",
 				"[concat(variables('workspaceId'), '/notebooks/AggregateAndSaveToGold')]",
-				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]",
+				"[concat(variables('workspaceId'), '/datasets/DedicatedPoolTables')]"
 			]
 		},
 		{
@@ -892,7 +942,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- SELECT county, COUNT(policyID) AS count_policyID, MAX(eq_site_limit) AS max_eq_site_limit\n-- FROM (\n--   SELECT *, ROW_NUMBER() OVER (PARTITION BY county ORDER BY eq_site_limit DESC) AS row_num\n--   FROM [insurance].[FL_insurance_sample]\n-- ) t\n-- WHERE row_num = 1\n-- GROUP BY county\n\n\n-- SELECT top 1000 *, ROW_NUMBER() OVER (PARTITION BY county ORDER BY eq_site_limit DESC) AS row_num\n-- FROM [insurance].[FL_insurance_sample]\n\n\nselect * \nfrom [insurance].[FL_insurance_sample]\nwhere policyID = 949187",
+					"query": "-- SELECT county, COUNT(policyID) AS count_policyID, MAX(eq_site_limit) AS max_eq_site_limit\n-- FROM (\n--   SELECT *, ROW_NUMBER() OVER (PARTITION BY county ORDER BY eq_site_limit DESC) AS row_num\n--   FROM [insurance].[FL_insurance_sample]\n-- ) t\n-- WHERE row_num = 1\n-- GROUP BY county\n\n\n-- SELECT top 1000 *, ROW_NUMBER() OVER (PARTITION BY county ORDER BY eq_site_limit DESC) AS row_num\n-- FROM [insurance].[FL_insurance_sample]\n\n-- where policyID = 949187\n\nselect count(*)\nfrom [insurance].[FL_insurance_sample]\nunion all\nselect DISTINCT count(policyID)\nfrom [insurance].[FL_insurance_sample];",
 					"metadata": {
 						"language": "sql"
 					},
@@ -927,7 +977,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "87e69168-1030-4200-8b68-3dbce0bcae40"
+						"spark.autotune.trackingId": "331c491c-295d-4f9c-9a4e-dcfa959b38a6"
 					}
 				},
 				"metadata": {
@@ -977,7 +1027,7 @@
 							"filename_no_extension = 'FL_insurance_sample'"
 						],
 						"outputs": [],
-						"execution_count": 1
+						"execution_count": null
 					},
 					{
 						"cell_type": "code",
@@ -1033,105 +1083,143 @@
 						],
 						"outputs": [],
 						"execution_count": 2
-					},
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LakeDatabase')]",
+			"type": "Microsoft.Synapse/workspaces/databases",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"Ddls": [
 					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "LakeDatabase",
+							"EntityType": "DATABASE",
+							"Origin": {
+								"Type": "SPARK"
 							},
-							"nteract": {
-								"transient": {
-									"deleting": false
+							"Properties": {
+								"IsSyMSCDMDatabase": true
+							},
+							"Source": {
+								"Provider": "ADLS",
+								"Location": "abfss://test-container@kubastorage.dfs.core.windows.net/gold",
+								"Properties": {
+									"FormatType": "parquet",
+									"LinkedServiceName": "euwestsynapse-WorkspaceDefaultStorage"
 								}
 							}
 						},
-						"source": [
-							"spark.read.parquet(f'{container}/{input_medallion}/{filename_no_extension}.parquet').printSchema()"
-						],
-						"outputs": [],
-						"execution_count": 4
+						"Source": {
+							"Type": "SPARK"
+						}
 					},
 					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "insurance",
+							"EntityType": "TABLE",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase"
 							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
+							"Description": "",
+							"TableType": "EXTERNAL",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"StorageDescriptor": {
+								"Columns": [
+									{
+										"Name": "county",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 8000,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										}
+									},
+									{
+										"Name": "count_policyID",
+										"OriginDataTypeName": {
+											"TypeName": "long",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Properties": {
+												"HIVE_TYPE_STRING": "long"
+											}
+										}
+									},
+									{
+										"Name": "max_eq_site_limit",
+										"OriginDataTypeName": {
+											"TypeName": "double",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Properties": {
+												"HIVE_TYPE_STRING": "double"
+											}
+										}
+									},
+									{
+										"Name": "policyID_with_max_eq_site_limit",
+										"OriginDataTypeName": {
+											"TypeName": "long",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Properties": {
+												"HIVE_TYPE_STRING": "long"
+											}
+										}
+									}
+								],
+								"Format": {
+									"InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+									"OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+									"FormatType": "parquet",
+									"SerializeLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+									"Properties": {
+										"path": "abfss://test-container@kubastorage.dfs.core.windows.net/gold",
+										"FormatTypeSetToDatabaseDefault": false
+									}
+								},
+								"Source": {
+									"Provider": "ADLS",
+									"Location": "abfss://test-container@kubastorage.dfs.core.windows.net/gold",
+									"Properties": {
+										"LinkedServiceName": "euwestsynapse-WorkspaceDefaultStorage",
+										"LocationSetToDatabaseDefault": false
+									}
+								},
+								"Properties": {
+									"textinputformat.record.delimiter": ",",
+									"compression": "",
+									"derivedModelAttributeInfo": "{\"attributeReferences\":{}}"
+								},
+								"Compressed": false,
+								"IsStoredAsSubdirectories": false
+							},
+							"Properties": {
+								"Description": "",
+								"DisplayFolderInfo": "{\"name\":\"Others\",\"colorCode\":\"\"}",
+								"PrimaryKeys": "",
+								"spark.sql.sources.provider": "parquet"
+							},
+							"Retention": 0,
+							"Temporary": false,
+							"IsRewriteEnabled": false
 						},
-						"source": [
-							"mssparkutils.notebook.exit(f\"Successfully created {output_medallion}/{filename_no_extension}.parquet.\")"
-						],
-						"outputs": [],
-						"execution_count": null
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							"1"
-						],
-						"outputs": [],
-						"execution_count": 5
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							},
-							"collapsed": false
-						},
-						"source": [
-							"display(\n",
-							"    df\n",
-							"    .where(F.col(\"policyID\") == 949187)\n",
-							")"
-						],
-						"outputs": [],
-						"execution_count": 6
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							""
-						],
-						"outputs": [],
-						"execution_count": null
+						"Source": {
+							"Type": "SPARK"
+						}
 					}
 				]
 			},
