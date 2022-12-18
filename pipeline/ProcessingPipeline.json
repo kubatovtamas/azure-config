@@ -397,6 +397,7 @@
 					},
 					"sink": {
 						"type": "SqlDWSink",
+						"preCopyScript": "DROP TABLE [insurance].[@variables('fileNameNoExtension')]\nGO",
 						"allowCopyCommand": true,
 						"tableOption": "autoCreate",
 						"disableMetricsCollection": false
