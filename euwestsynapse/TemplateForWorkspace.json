@@ -18,7 +18,7 @@
 		},
 		"ZipAddedTrigger_properties_ProcessingPipeline_parameters_sourceFileName": {
 			"type": "string",
-			"defaultValue": "@triggerBody.fileName"
+			"defaultValue": "@triggerBody().fileName"
 		},
 		"ZipAddedTrigger_properties_typeProperties_scope": {
 			"type": "string",
@@ -630,7 +630,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "4c977f1f-cf30-4beb-8456-c49aea190ea4"
+						"spark.autotune.trackingId": "d15d5385-768d-4b3e-9310-5868cb77e590"
 					}
 				},
 				"metadata": {
