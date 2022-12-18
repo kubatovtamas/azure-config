@@ -1,5 +1,5 @@
 {
-	"name": "ProcessingPipeline_copy1",
+	"name": "ProcessingPipeline_v2",
 	"properties": {
 		"activities": [
 			{
@@ -106,7 +106,11 @@
 					},
 					"parameters": {
 						"filename_no_extension": {
-							"value": "@variables('fileNameNoExtension')"
+							"value": {
+								"value": "@variables('fileNameNoExtension')",
+								"type": "Expression"
+							},
+							"type": "string"
 						}
 					},
 					"snapshot": true,

@@ -1,5 +1,5 @@
 {
-	"name": "ProcessingPipeline",
+	"name": "ProcessingPipeline_v1",
 	"properties": {
 		"activities": [
 			{

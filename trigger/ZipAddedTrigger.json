@@ -6,7 +6,7 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "ProcessingPipeline",
+					"referenceName": "ProcessingPipeline_v1",
 					"type": "PipelineReference"
 				},
 				"parameters": {
