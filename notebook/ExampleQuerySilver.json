@@ -13,7 +13,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "a2f528ec-a600-4878-9340-be1cd6e31564"
+				"spark.autotune.trackingId": "2fbc3dee-9565-4b9d-8f0f-f41fc2305c36"
 			}
 		},
 		"metadata": {
@@ -34,7 +34,7 @@
 				"source": [
 					"# Parquet\r\n",
 					"\r\n",
-					"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/FL_insurance_sample/**', format='parquet')\r\n",
+					"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/insurance_renamed/**', format='parquet')\r\n",
 					"display(df.limit(100))"
 				],
 				"execution_count": null

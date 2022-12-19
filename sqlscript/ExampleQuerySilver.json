@@ -2,7 +2,7 @@
 	"name": "ExampleQuerySilver",
 	"properties": {
 		"content": {
-			"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/silver/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+			"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/silver/insurance_renamed/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
 			"metadata": {
 				"language": "sql"
 			},
