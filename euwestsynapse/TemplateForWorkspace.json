@@ -16,11 +16,15 @@
 			"type": "string",
 			"defaultValue": "https://kubastorage.dfs.core.windows.net"
 		},
-		"ZipAddedTrigger_properties_ProcessingPipeline_parameters_sourceFileName": {
+		"ZipAddedTrigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Storage/storageAccounts/kubastorage"
+		},
+		"ZipUploadedTrigger_properties_ProcessingPipeline_parameters_sourceFileName": {
 			"type": "string",
 			"defaultValue": "@triggerBody().fileName"
 		},
-		"ZipAddedTrigger_properties_typeProperties_scope": {
+		"ZipUploadedTrigger_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/7a27c1f7-9a3b-4cd7-9dc2-c164affa0563/resourceGroups/EU_West_RG/providers/Microsoft.Storage/storageAccounts/kubastorage"
 		}
@@ -414,17 +418,7 @@
 			"properties": {
 				"annotations": [],
 				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "ProcessingPipeline",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"sourceFileName": "[parameters('ZipAddedTrigger_properties_ProcessingPipeline_parameters_sourceFileName')]"
-						}
-					}
-				],
+				"pipelines": [],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
 					"blobPathBeginsWith": "/test-container/blobs/bronze",
@@ -436,9 +430,7 @@
 					]
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/ProcessingPipeline')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
@@ -630,7 +622,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "d15d5385-768d-4b3e-9310-5868cb77e590"
+						"spark.autotune.trackingId": "b1fd057b-f446-4703-bbab-ec5671bd1bec"
 					}
 				},
 				"metadata": {
@@ -847,6 +839,39 @@
 			},
 			"dependsOn": [],
 			"location": "westeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ZipUploadedTrigger')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "ProcessingPipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"sourceFileName": "[parameters('ZipUploadedTrigger_properties_ProcessingPipeline_parameters_sourceFileName')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/test-container/blobs/bronze",
+					"blobPathEndsWith": "zip",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('ZipUploadedTrigger_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/ProcessingPipeline')]"
+			]
 		}
 	]
 }
