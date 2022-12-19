@@ -433,6 +433,39 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/ZipUploadedTrigger')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "ProcessingPipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"sourceFileName": "[parameters('ZipUploadedTrigger_properties_ProcessingPipeline_parameters_sourceFileName')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/test-container/blobs/bronze",
+					"blobPathEndsWith": "zip",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('ZipUploadedTrigger_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/ProcessingPipeline')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
 			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
 			"apiVersion": "2019-06-01-preview",
@@ -467,7 +500,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n\n-- Managed Table\nSELECT TOP (100) [county]\n,[count_policyID]\n,[max_eq_site_limit]\n,[policyID_with_max_eq_site_limit]\n FROM [insurance].[dbo].[fl_insurance_sample]\n",
+					"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/gold/insurance_renamed/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\n\n-- Managed Table\nSELECT TOP (100) [county]\n,[count_policyID]\n,[max_eq_site_limit]\n,[policyID_with_max_eq_site_limit]\n FROM [insurance].[dbo].[fl_insurance_sample]\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -487,12 +520,52 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/silver/FL_insurance_sample/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+					"query": "-- Parquet\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://kubastorage.dfs.core.windows.net/test-container/silver/insurance_renamed/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
 						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "ALTER SERVER ROLE sysadmin ADD MEMBER [demouser@kubatovtamas01gmail.onmicrosoft.com];",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "default",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "insurance",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
@@ -518,7 +591,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "395b42fb-08e3-4eeb-b73c-f24d04416da4"
+						"spark.autotune.trackingId": "da6bec9a-476a-4aa8-96e2-38b88b578054"
 					}
 				},
 				"metadata": {
@@ -538,12 +611,12 @@
 						"cell_type": "code",
 						"source": [
 							"# Parquet\n",
-							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/FL_insurance_sample/**', format='parquet')\n",
+							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/insurance_renamed/**', format='parquet')\n",
 							"display(df.limit(100))\n",
 							"\n",
 							"\n",
 							"# Managed Table\n",
-							"df = spark.sql(\"SELECT * FROM `insurance`.`fl_insurance_sample`\")\n",
+							"df = spark.sql(\"SELECT * FROM `insurance`.`insurance_renamed`\")\n",
 							"df.show(100)"
 						],
 						"outputs": [],
@@ -570,7 +643,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "a2f528ec-a600-4878-9340-be1cd6e31564"
+						"spark.autotune.trackingId": "3462e548-b94c-4ef8-ae07-2cbfe07f4dc1"
 					}
 				},
 				"metadata": {
@@ -588,10 +661,11 @@
 				"cells": [
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# Parquet\r\n",
 							"\r\n",
-							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/FL_insurance_sample/**', format='parquet')\r\n",
+							"df = spark.read.load('abfss://test-container@kubastorage.dfs.core.windows.net/silver/insurance_renamed/**', format='parquet')\r\n",
 							"display(df.limit(100))"
 						],
 						"outputs": [],
@@ -622,7 +696,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "b1fd057b-f446-4703-bbab-ec5671bd1bec"
+						"spark.autotune.trackingId": "e214caca-194f-4b99-ac01-8bbb2d04813f"
 					}
 				},
 				"metadata": {
@@ -647,8 +721,7 @@
 						"sparkVersion": "3.2",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -839,39 +912,6 @@
 			},
 			"dependsOn": [],
 			"location": "westeurope"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/ZipUploadedTrigger')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "ProcessingPipeline",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"sourceFileName": "[parameters('ZipUploadedTrigger_properties_ProcessingPipeline_parameters_sourceFileName')]"
-						}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/test-container/blobs/bronze",
-					"blobPathEndsWith": "zip",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('ZipUploadedTrigger_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/ProcessingPipeline')]"
-			]
 		}
 	]
 }
